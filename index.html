@@ -11295,54 +11295,6 @@ document.addEventListener('DOMContentLoaded', function() {
     return Math.floor(100000 + Math.random() * 900000).toString();
   }
   
-  async function sendOTPSMS(phone, code) {
-    try {
-      debugLog(`SMS gönderimi başlatılıyor: ${phone}`);
-      
-      // Mesaj metni
-      const messageText = `FAST CPR Dogrulama Kodunuz: ${code}\n\nKod 5 dakika gecerlidir. Kimseyle paylasmayiniz.`;
-      
-      // İletimerkezi API v1 - GET metodu
-      const url = new URL('https://api.iletimerkezi.com/v1/send-sms/get/');
-      url.searchParams.append('key', _0xapi.k);
-      url.searchParams.append('hash', _0xapi.h);
-      url.searchParams.append('text', messageText);
-      url.searchParams.append('receipents', phone);
-      url.searchParams.append('sender', _0xapi.s);
-      url.searchParams.append('iys', '1');
-      url.searchParams.append('iysList', 'BIREYSEL');
-      
-      debugLog(`API URL: ${url.toString()}`);
-      
-      // CORS bypass - iframe kullan
-      return new Promise((resolve, reject) => {
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = url.toString();
-        
-        let timeout = setTimeout(() => {
-          document.body.removeChild(iframe);
-          debugLog('✅ SMS isteği gönderildi (CORS bypass)');
-          resolve({ success: true, note: 'CORS bypass - response okunamıyor' });
-        }, 2000);
-        
-        iframe.onerror = () => {
-          clearTimeout(timeout);
-          document.body.removeChild(iframe);
-          debugLog('❌ iframe hata');
-          reject(new Error('SMS gönderilemedi'));
-        };
-        
-        document.body.appendChild(iframe);
-        debugLog('iframe ile istek gönderildi');
-      });
-      
-    } catch (error) {
-      debugLog(`❌ SMS Gönderim EXCEPTION: ${error.message}`);
-      console.error('❌ SMS Gönderim Hatası:', error);
-      throw error;
-    }
-  }
   
   // Global
   let tempOTP = {
