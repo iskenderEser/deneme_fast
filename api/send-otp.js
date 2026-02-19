@@ -1,5 +1,6 @@
 // Vercel Serverless Function - Turkcell OTP SMS
 // Path: /api/send-otp.js
+// URL ENCODE DÜZELTMESI YAPILDI
 
 export default async function handler(req, res) {
   // CORS headers
@@ -37,59 +38,70 @@ export default async function handler(req, res) {
 
     console.log('📤 SMS gönderimi başlatılıyor:', phone);
 
-    // ADIM 1: Token al
+    // ADIM 1: Token al (URL encode tüm parametreler)
     const authUrl = new URL('https://live.iletisimmakinesi.com/api/UserGatewayWS/functions/authenticate');
-    authUrl.searchParams.append('userName', API_USER);
-    authUrl.searchParams.append('userPass', API_PASS);
-    authUrl.searchParams.append('customerCode', API_CUSTOMER);
-    authUrl.searchParams.append('apiKey', API_KEY);
-    authUrl.searchParams.append('vendorCode', API_VENDOR);
+    authUrl.searchParams.append('userName', encodeURIComponent(API_USER));
+    authUrl.searchParams.append('userPass', encodeURIComponent(API_PASS));
+    authUrl.searchParams.append('customerCode', encodeURIComponent(API_CUSTOMER));
+    authUrl.searchParams.append('apiKey', encodeURIComponent(API_KEY));
+    authUrl.searchParams.append('vendorCode', encodeURIComponent(API_VENDOR));
 
     console.log('🔑 Token alınıyor...');
     const authResponse = await fetch(authUrl.toString());
     const authXml = await authResponse.text();
 
+    console.log('📥 Auth Response:', authXml.substring(0, 500));
+
     // Token parse (basit regex)
     const tokenMatch = authXml.match(/<TOKEN_NO>(.*?)<\/TOKEN_NO>/);
     if (!tokenMatch) {
       console.error('❌ Token alınamadı:', authXml);
-      return res.status(500).json({ error: 'Token alınamadı' });
+      return res.status(500).json({ 
+        error: 'Token alınamadı', 
+        response: authXml.substring(0, 1000) 
+      });
     }
     const token = tokenMatch[1];
     console.log('✅ Token alındı:', token.substring(0, 20) + '...');
 
-    // ADIM 2: Originator ID al
+    // ADIM 2: Originator ID al (URL encode token)
     const origUrl = new URL('https://live.iletisimmakinesi.com/api/UserGatewayWS/functions/getOriginators');
-    origUrl.searchParams.append('token', token);
-    origUrl.searchParams.append('serviceId', SERVICE_ID);
+    origUrl.searchParams.append('token', encodeURIComponent(token));
+    origUrl.searchParams.append('serviceId', encodeURIComponent(SERVICE_ID));
 
     console.log('📋 Originator ID alınıyor...');
+    console.log('🔗 Originator URL:', origUrl.toString().substring(0, 150) + '...');
     const origResponse = await fetch(origUrl.toString());
     const origXml = await origResponse.text();
+
+    console.log('📥 Originator Response:', origXml.substring(0, 500));
 
     // Originator ID parse
     const origMatch = origXml.match(/<ORIGINATOR[^>]*id="(\d+)"/);
     if (!origMatch) {
       console.error('❌ Originator ID alınamadı:', origXml);
-      return res.status(500).json({ error: 'Originator ID alınamadı' });
+      return res.status(500).json({ 
+        error: 'Originator ID alınamadı', 
+        response: origXml.substring(0, 1000) 
+      });
     }
     const originatorId = origMatch[1];
     console.log('✅ Originator ID alındı:', originatorId);
 
-    // ADIM 3: SMS gönder
+    // ADIM 3: SMS gönder (URL encode tüm parametreler)
     const messageText = `FAST CPR Dogrulama Kodunuz: ${code}\n\nKod 5 dakika gecerlidir. Kimseyle paylasmayiniz.`;
     
     const smsUrl = new URL('https://live.iletisimmakinesi.com/api/SingleShotWS/functions/sendSingleShotSMS');
-    smsUrl.searchParams.append('token', token);
-    smsUrl.searchParams.append('originatorId', originatorId);
-    smsUrl.searchParams.append('phoneNumber', '90' + phone);
-    smsUrl.searchParams.append('messageText', messageText);
+    smsUrl.searchParams.append('token', encodeURIComponent(token));
+    smsUrl.searchParams.append('originatorId', encodeURIComponent(originatorId));
+    smsUrl.searchParams.append('phoneNumber', encodeURIComponent('90' + phone));
+    smsUrl.searchParams.append('messageText', encodeURIComponent(messageText));
 
     console.log('📱 SMS gönderiliyor...');
     const smsResponse = await fetch(smsUrl.toString());
     const smsXml = await smsResponse.text();
 
-    console.log('📥 SMS Response:', smsXml.substring(0, 300));
+    console.log('📥 SMS Response:', smsXml.substring(0, 500));
 
     // Status parse
     const statusMatch = smsXml.match(/<CODE>(.*?)<\/CODE>/);
@@ -107,7 +119,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ 
         error: 'SMS gönderilemedi',
         statusCode: statusCode,
-        response: smsXml.substring(0, 500)
+        response: smsXml.substring(0, 1000)
       });
     }
 
