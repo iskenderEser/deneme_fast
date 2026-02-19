@@ -11132,44 +11132,33 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  // OTP SMS gönder
+  // OTP SMS gönder (Vercel Function)
   async function sendOTPSMS(phone, code) {
     try {
-      debugLog(`📤 Turkcell OTP SMS gönderimi başlatılıyor: ${phone}`);
+      debugLog(`📤 Vercel Function çağrılıyor: ${phone}`);
       
-      const token = await getIletisimToken();
-      const originatorId = await getOriginatorId();
+      const response = await fetch('https://deneme-fast.vercel.app/api/send-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          phone: phone,
+          code: code
+        })
+      });
       
-      const messageText = `FAST CPR Dogrulama Kodunuz: ${code}\n\nKod 5 dakika gecerlidir. Kimseyle paylasmayiniz.`;
+      debugLog(`📥 Response status: ${response.status}`);
       
-      const url = new URL(`${iletisimAPI.baseURL}/SingleShotWS/functions/sendSingleShotSMS`);
-      url.searchParams.append('token', token);
-      url.searchParams.append('originatorId', originatorId);
-      url.searchParams.append('phoneNumber', '90' + phone); // 90 ön eki ekle
-      url.searchParams.append('messageText', messageText);
+      const result = await response.json();
+      debugLog(`📥 Response: ${JSON.stringify(result)}`);
       
-      debugLog(`📡 API isteği gönderiliyor...`);
-      
-      const response = await fetch(url.toString());
-      const xmlText = await response.text();
-      
-      debugLog(`📥 API response: ${xmlText.substring(0, 300)}`);
-      
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-      
-      const statusCode = xmlDoc.querySelector('STATUS CODE')?.textContent;
-      const statusMessage = xmlDoc.querySelector('STATUS NAME')?.textContent;
-      const smsId = xmlDoc.querySelector('SINGLE_SHOT')?.getAttribute('id');
-      
-      debugLog(`Status: ${statusCode} - ${statusMessage}`);
-      
-      if (statusCode === '0') {
-        debugLog(`✅ SMS başarıyla gönderildi! ID: ${smsId}`);
-        return { success: true, smsId: smsId };
+      if (response.ok && result.success) {
+        debugLog('✅ SMS başarıyla gönderildi!');
+        return { success: true };
       } else {
-        debugLog(`❌ SMS hatası: ${statusCode} - ${statusMessage}`);
-        throw new Error(statusMessage || 'SMS gönderilemedi');
+        debugLog(`❌ SMS hatası: ${result.error || 'Unknown'}`);
+        throw new Error(result.error || 'SMS gönderilemedi');
       }
       
     } catch (error) {
