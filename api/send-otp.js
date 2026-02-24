@@ -64,10 +64,10 @@ export default async function handler(req, res) {
     const token = tokenMatch[1];
     console.log('✅ Token alındı:', token.substring(0, 20) + '...');
 
-    // ADIM 2: Originator ID al (URL encode token)
+    // ADIM 2: Originator ID al (token encode ETMEYİN!)
     const origUrl = new URL('https://live.iletisimmakinesi.com/api/UserGatewayWS/functions/getOriginators');
-    origUrl.searchParams.append('token', encodeURIComponent(token));
-    origUrl.searchParams.append('serviceId', encodeURIComponent(SERVICE_ID));
+    origUrl.searchParams.append('token', token); // URL encode YOK!
+    origUrl.searchParams.append('serviceId', SERVICE_ID);
 
     console.log('📋 Originator ID alınıyor...');
     console.log('🔗 Originator URL:', origUrl.toString().substring(0, 150) + '...');
@@ -88,14 +88,14 @@ export default async function handler(req, res) {
     const originatorId = origMatch[1];
     console.log('✅ Originator ID alındı:', originatorId);
 
-    // ADIM 3: SMS gönder (URL encode tüm parametreler)
+    // ADIM 3: SMS gönder (token encode ETMEYİN!)
     const messageText = `FAST CPR Dogrulama Kodunuz: ${code}\n\nKod 5 dakika gecerlidir. Kimseyle paylasmayiniz.`;
     
     const smsUrl = new URL('https://live.iletisimmakinesi.com/api/SingleShotWS/functions/sendSingleShotSMS');
-    smsUrl.searchParams.append('token', encodeURIComponent(token));
-    smsUrl.searchParams.append('originatorId', encodeURIComponent(originatorId));
-    smsUrl.searchParams.append('phoneNumber', encodeURIComponent('90' + phone));
-    smsUrl.searchParams.append('messageText', encodeURIComponent(messageText));
+    smsUrl.searchParams.append('token', token); // URL encode YOK!
+    smsUrl.searchParams.append('originatorId', originatorId);
+    smsUrl.searchParams.append('phoneNumber', '90' + phone);
+    smsUrl.searchParams.append('messageText', messageText); // Bu encode edilebilir
 
     console.log('📱 SMS gönderiliyor...');
     const smsResponse = await fetch(smsUrl.toString());
