@@ -38,13 +38,13 @@ export default async function handler(req, res) {
 
     console.log('📤 SMS gönderimi başlatılıyor:', phone);
 
-    // ADIM 1: Token al (URL encode tüm parametreler)
+    // ADIM 1: Token al (parametreler düz gönderilecek)
     const authUrl = new URL('https://live.iletisimmakinesi.com/api/UserGatewayWS/functions/authenticate');
-    authUrl.searchParams.append('userName', encodeURIComponent(API_USER));
-    authUrl.searchParams.append('userPass', encodeURIComponent(API_PASS));
-    authUrl.searchParams.append('customerCode', encodeURIComponent(API_CUSTOMER));
-    authUrl.searchParams.append('apiKey', encodeURIComponent(API_KEY));
-    authUrl.searchParams.append('vendorCode', encodeURIComponent(API_VENDOR));
+    authUrl.searchParams.append('userName', API_USER);
+    authUrl.searchParams.append('userPass', API_PASS);
+    authUrl.searchParams.append('customerCode', API_CUSTOMER);
+    authUrl.searchParams.append('apiKey', API_KEY);
+    authUrl.searchParams.append('vendorCode', API_VENDOR);
 
     console.log('🔑 Token alınıyor...');
     const authResponse = await fetch(authUrl.toString());
@@ -64,17 +64,17 @@ export default async function handler(req, res) {
     const token = tokenMatch[1];
     console.log('✅ Token alındı:', token.substring(0, 20) + '...');
 
-    // ADIM 2: Originator ID al (token encode ETMEYİN!)
+    // ADIM 2: Originator ID al (API'den çek)
     const origUrl = new URL('https://live.iletisimmakinesi.com/api/UserGatewayWS/functions/getOriginators');
-    origUrl.searchParams.append('token', token); // URL encode YOK!
+    origUrl.searchParams.append('token', token);
     origUrl.searchParams.append('serviceId', SERVICE_ID);
 
     console.log('📋 Originator ID alınıyor...');
-    console.log('🔗 Originator URL:', origUrl.toString().substring(0, 150) + '...');
+    console.log('🔗 Originator URL:', origUrl.toString());
     const origResponse = await fetch(origUrl.toString());
     const origXml = await origResponse.text();
 
-    console.log('📥 Originator Response:', origXml.substring(0, 500));
+    console.log('📥 Originator Response:', origXml.substring(0, 1000));
 
     // Originator ID parse
     const origMatch = origXml.match(/<ORIGINATOR[^>]*id="(\d+)"/);
@@ -88,7 +88,7 @@ export default async function handler(req, res) {
     const originatorId = origMatch[1];
     console.log('✅ Originator ID alındı:', originatorId);
 
-    // ADIM 3: SMS gönder (token encode ETMEYİN!)
+    // ADIM 3: SMS gönder
     const messageText = `FAST CPR Dogrulama Kodunuz: ${code}\n\nKod 5 dakika gecerlidir. Kimseyle paylasmayiniz.`;
     
     const smsUrl = new URL('https://live.iletisimmakinesi.com/api/SingleShotWS/functions/sendSingleShotSMS');
