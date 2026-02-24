@@ -92,10 +92,10 @@ export default async function handler(req, res) {
     const messageText = `FAST CPR Dogrulama Kodunuz: ${code}\n\nKod 5 dakika gecerlidir. Kimseyle paylasmayiniz.`;
     
     const smsUrl = new URL('https://live.iletisimmakinesi.com/api/SingleShotWS/functions/sendSingleShotSMS');
-    smsUrl.searchParams.append('token', token); // URL encode YOK!
+    smsUrl.searchParams.append('token', token);
     smsUrl.searchParams.append('originatorId', originatorId);
-    smsUrl.searchParams.append('phoneNumber', '90' + phone);
-    smsUrl.searchParams.append('messageText', messageText); // Bu encode edilebilir
+    smsUrl.searchParams.append('phoneNumber', '90' + phone.substring(1)); // 0 kaldır, 90 ekle
+    smsUrl.searchParams.append('messageText', messageText);
 
     console.log('📱 SMS gönderiliyor...');
     const smsResponse = await fetch(smsUrl.toString());
