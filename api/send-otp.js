@@ -76,8 +76,8 @@ export default async function handler(req, res) {
 
     console.log('📥 Originator Response:', origXml.substring(0, 1000));
 
-    // Originator ID parse
-    const origMatch = origXml.match(/<ORIGINATOR[^>]*id="(\d+)"/);
+    // Originator ID parse (sadece id="..." yakala, service_id değil!)
+    const origMatch = origXml.match(/<ORIGINATOR id="(\d+)"/);
     if (!origMatch) {
       console.error('❌ Originator ID alınamadı:', origXml);
       return res.status(500).json({ 
