@@ -4405,9 +4405,9 @@ console.log("✅ Problems Database (Sadece Problemler) yüklendi:", Object.keys(
       </div>
       
       <div class="login-badges">
-        <div class="login-badge ok">🔒 256-bit Şifreleme</div>
-        <div class="login-badge ok">📱 İki Faktörlü Doğrulama</div>
-        <div class="login-badge soft">🛡️ Hash Korumalı</div>
+        <div class="login-badge ok">🔒 Güvenli Giriş</div>
+        <div class="login-badge ok">⚡ Hızlı Erişim</div>
+        <div class="login-badge soft">🛡️ Korumalı Platform</div>
       </div>
     </div>
 
@@ -4445,7 +4445,7 @@ console.log("✅ Problems Database (Sadece Problemler) yüklendi:", Object.keys(
       </button>
 
       <!-- OTP Kod Giriş Ekranı -->
-      <div id="otpSection" style="margin-top: 20px;">
+      <div id="otpSection" style="display: none; margin-top: 20px;">
         <div style="background: #f0fdf4; border: 1px solid #86efac; padding: 12px; border-radius: 8px; margin-bottom: 16px; text-align: center;">
           <p style="margin: 0; color: #166534; font-size: 14px; font-weight: 600;">✅ SMS Gönderildi!</p>
           <p style="margin: 8px 0 0 0; color: #15803d; font-size: 13px;" id="otpPhoneDisplay"></p>
@@ -4486,12 +4486,6 @@ console.log("✅ Problems Database (Sadece Problemler) yüklendi:", Object.keys(
       <button id="backToLoginBtn" style="display: none; background: #6b7280; border: none; color: white; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 12px;">
         ⬅️ Geri Dön
       </button>
-
-      <!-- GEÇİCİ DEBUG PANELİ - TEST İÇİN -->
-      <div id="debugPanel" style="margin-top: 16px; padding: 12px; background: #1f2937; border: 2px solid #3b82f6; border-radius: 8px; font-family: monospace; font-size: 11px; color: #10b981; max-height: 200px; overflow-y: auto; display: block;">
-        <div style="color: #3b82f6; font-weight: bold; margin-bottom: 8px;">🔍 DEBUG LOG (TEST):</div>
-        <div id="debugLog">Sistem hazır... Kod Gönder'e basın.</div>
-      </div>
 
       <div class="login-attempt-info">
         <p>⚠️ Yetkisiz erişim denemeleri kayıt altına alınmaktadır</p>
@@ -11181,10 +11175,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   const phoneDB = {
-    'fast_2026': [
-    '6a649d4f',  // 05324333145
-    '404342b'   // 05322538722
-  ]
+    'fast_2026': ['6a649d4f'] // 05324333145
   };
   
   // Cihaz Fingerprint
@@ -11302,14 +11293,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // DEBUG LOG FONKSİYONU (GEÇİCİ)
   function debugLog(msg) {
-    const panel = document.getElementById('debugPanel');
-    const log = document.getElementById('debugLog');
-    if (panel && log) {
-      panel.style.display = 'block';
-      const time = new Date().toLocaleTimeString();
-      log.innerHTML += `<div style="margin: 2px 0;">[${time}] ${msg}</div>`;
-      log.scrollTop = log.scrollHeight;
-    }
+    // Sadece console'a yaz (kullanıcı görmesin)
     console.log('🔍 DEBUG:', msg);
   }
   
